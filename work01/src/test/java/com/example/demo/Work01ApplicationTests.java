@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -26,6 +27,29 @@ class Work01ApplicationTests {
 		assertTrue(!list.isEmpty());
 	}
 	
+//	@Test
+	public void selectOne() {
+		DeptVO dept = DeptVO.builder()
+							.departmentId(100)
+							.build();
+		DeptVO findVO = deptMapper.selectInfo(dept);
+		System.out.println(findVO);
+		assertEquals("King", findVO.getDepartmentName());
+	}
+	
+//  @Test
+	public void insertValue() {
+    	DeptVO dept = DeptVO.builder()
+    					 .departmentId(1000)
+    					 .departmentName("IT")
+    					 .managerId(200)
+    					 .locationId(20)
+    					 .build();
+    	int result = deptMapper.insertInfo(dept);
+    	
+    	assertEquals(1, result);
+    }
+  
 	
 
 }

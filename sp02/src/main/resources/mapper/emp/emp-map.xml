@@ -1,59 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yedam.app.emp.mapper.EmpMapper">
-    <!-- Interface의 메서드를 통해 실행한 쿼리 정의 -->
-    <select id="selectAll"
-        resultType="EmpVO">
-        SELECT employee_id
-            , last_name
-            , email
-            , hire_date
-            , job_id
-            , salary
-        FROM employees
-        ORDER BY employee_id
-    </select>
-    
-    <select id="selectInfo" 
-            parameterType="EmpVO"
-            resultType="EmpVO">
-        SELECT employee_id
-            , last_name
-            , email
-            , hire_date
-            , job_id
-            , salary
-        FROM employees
-        WHERE employee_id = #{employeeId}
-    </select>
-    
-    <insert id="insertInfo"
-            parameterType="EmpVO">
-    <selectKey keyProperty="employeeId" resultType="Integer" order="BEFORE">
-    	SELECT NVL(MAX(employee_id), 100)+1
-    	FROM   employees
-    </selectKey>
-        Insert INTO employees
-            (
-                employee_id
-                , last_name
-                , email
-                , hire_date
-                , job_id
-                <if test="salary >= 1"> <!-- mybatis가 가지는 다이나믹sql 중 하나. -->
-                , salary
-                </if>
-            )
-            VALUES
-            (
-                #{employeeId}
-                , #{lastName}
-                , #{email}
-                , sysdate
-                , #{jobId}
-                <if test="salary >= 1">
-                , #{salary}
-                </if>
-            )
-    </insert>
+	<!-- Interface의 메서드를 통해 실행한 쿼리 정의 -->
+	<select id="selectAll" resultType="EmpVO">
+		SELECT   employee_id
+       			,last_name
+       			,email
+      			,hire_date
+    			,job_id
+       		  	,salary
+		FROM     employees
+		ORDER BY employee_id
+	</select>
+	
+	<select id="selectInfo" parameterType="EmpVO" resultType="EmpVO">
+		SELECT   employee_id
+       			,last_name
+       			,email
+      			,hire_date
+    			,job_id
+       		  	,salary
+		FROM     employees
+		WHERE    employee_id = #{employeeId} <!-- 프라이머리 키 기준으로 #{}는 파라미터타입에 설정되어있음-->
+	</select>
+	
+	<!-- insert에 result타입은 생략 -->
+	<insert id="insertInfo" parameterType="EmpVO">
+	<!-- selectKey 결과는 => parameterType"employeeId" 에 담겨서 values 쿼리 작성할때의 employeeId에 사용이됌 -->
+	<selectKey keyProperty="employeeId" resultType="Integer" order="BEFORE"> <!-- 파라미터타입 이 데이터가 담기는곳 --> <!-- 실행한결과를 파라미터타입 안에서 어디 프로퍼티(EmpVO)에 어느 데이터타입 으로 넣겠다는 의미 -->
+		SELECT NVL(MAX(employee_id), 100) + 1
+		FROM   employees
+	</selectKey>
+		INSERT INTO employees
+				           (
+				            employee_id
+		       			   ,last_name
+		       			   ,email
+		      			   ,hire_date
+		    			   ,job_id
+		    			   <if test="salary >= 1">
+		       		  	   ,salary
+		       		  	   </if>
+		       		  	   )
+		       VALUES
+		       		  	   (
+		       		  	 	#{employeeId} <!-- 시퀀스 사용 => seq.다음값 // 시퀀스 사용안하면 NVL(MAX(employee_id), 100) + 1 -->
+       					   ,#{lastName}
+       					   ,#{email}
+      			 		   ,sysdate <!-- 실행시점의 날짜를 가져옴 -->
+    					   ,#{jobId}
+    					   <if test="salary >= 1"> <!-- 다이나믹 sql -->
+       		  			   ,#{salary}
+       		  			   </if>
+		       		  	   )
+	</insert>
+	<!-- salary는 체크 제약조건 때문에 0이라는 초기값을 가질 수가 없음 -->
+	
+	<update id="updateInfo">
+		UPDATE employees
+		SET
+		       last_name   = #{info.lastName}
+		       ,email       = #{info.email}
+		  	   ,salary      = #{info.salary}
+		WHERE  employee_id = #{id}
+	</update>
+	
+	<delete id="deleteInfo" parameterType="int">
+		DELETE FROM employees
+		WHERE       employee_id = #{eid}
+	</delete>
 </mapper>
