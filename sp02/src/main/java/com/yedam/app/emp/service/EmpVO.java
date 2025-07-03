@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // @빌더 시 생략되므로 명시적으로 추가
 public class EmpVO {
 	// employee_id이 => employeeId 으로 변환 => setEmployeeId 라는 setter를 실행 (mybatis가 _를 카멜케이스로 변환해서 이걸 기반으로 setter 를 실행함.)
-	// 설정이 없다면 이렇게됌 employee_id => setEmployee_id
+	// 설정이 없다면 이렇게 됨. employee_id => setEmployee_id
 	private Integer employeeId;
 	private String lastName;
 	private String email;
