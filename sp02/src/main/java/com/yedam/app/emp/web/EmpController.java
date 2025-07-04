@@ -13,83 +13,84 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yedam.app.emp.service.EmpService;
 import com.yedam.app.emp.service.EmpVO;
 
-@Controller
-// DispatcherServlet이 활용한 정보를 등록하는 Bean
-// route: 사용자의 요청(endpoint)과 그에 대한 처리
-// URI + HTTP METHOD => Service => Response(View or Data)
-	public class EmpController {
-		// 해당 컨트롤러에서 제공하는 서비스 목록
-		private final EmpService empService;
-		
-		// GET: 조회, 빈페이지, 데이터 조작(삭제)
-		
-		// POST: 데이터 조작(등록, 수정, 삭제) // body에 숨겨짐.
-		
-		// 전체조회 : GET
-		@GetMapping("empList") // 1) URI + METHOD 설정
-		public String empList(Model model) {
-			
-			// 2) 수행하는 기능 => Service
-			List<EmpVO> list = empService.findAllList();
-			
-			// 2-1) View에 전달할 데이터 담기
-			model.addAttribute("emps", list);
-			
-			// 3) 응답 형태: View
-			return "emp/list";
-			
-			// classpath:/template/emp/list.html
-			// prefix			  return   suffix
+import lombok.RequiredArgsConstructor;
+
+@Controller 
+// DispatherServlet이 활용한 정보를 등록하는 Bean
+// route : 사용자의 요청(endpoint)와 그에 대한 처리
+// 	URI + HTTP METHOD (get post delete) => Service => Response(View or Data)
+
+@RequiredArgsConstructor
+public class EmpController {
+	// 해당 컨트롤러에서 제공하는 서비스 목록
+	//final이 들어가면 무조건 생성자 요청, RequiredArgsConstructor(lombok) 사용.
+	private final EmpService empService;
+	
+	// GET : 조회, 빈페이지, 데이터 조작(삭제)
+	// POST : 데이터 조작(등록, 수정)
+	
+	//전체조회 : GET
+	@GetMapping("empList")// URI + METHOD
+	public String empList(Model model) {
+		//2) 수행기능 => Service
+		List<EmpVO> list = empService.findAllList();
+		//2-1) view 에 전달할 데이터 담기
+		model.addAttribute("emps", list);
+		//3) 응답형태 : View
+		return "emp/list";
+		//classpath:/template/emp/list.html
+		//prefix              return   suffix
+	}
+	//단건조회 : GET => QueryString
+	@GetMapping("empInfo")
+	public String empInfo(EmpVO empVO, Model model) {
+		EmpVO findVO = empService.findInfoById(empVO);
+		model.addAttribute("emp", findVO);
+		return "emp/info";
+	}
+	// 등록 - 페이지 : GET
+	@GetMapping("empInsert")
+	public String empInsertForm() {
+		return "emp/insert";
+	}
+	
+	// 등록 - 처리 : POST => <form/> submit QueryString
+	@PostMapping("empInsert")
+	public String empInsertProcess(EmpVO empVO) {
+		int eid = empService.createInfo(empVO);
+		String url = null;
+		if(eid > -1 ) {
+			//정상적으로 등록
+			url = "redirect:empInfo?employeeId=" + eid;
+		}else {
+			//등록되지 않은 경우 -> 얘는 등록이 실패했을때 실질적으로 실행되지 않을것 - 등록 실패 = 에러 이기 때문에 코드가 중단될것임.
+			url="redirect:empList";
 		}
-		
-		// 단건조회 : GET => QueryString
-		@GetMapping("empInfo")
-		public String empInfo(EmpVO empVO, Model model) {
-			EmpVO findVO = empService.findInfoById(empVO);
-			model.addAttribute("emp", findVO);
-			return "emp/info";
-		}
-		
-		// 등록 - 페이지 : GET
-		@GetMapping("empinsert")
-		public String empInsertForm() {
-			return "emp/insert";
-		}
-		
-		// 등록 - 처리 : POST // 수정은 ajax 많이 쓰지만, 등록은 중복 등록될 수 있어서 ajax 쓰지 않음. <form/> submit 활용! QueryString 형식으로 넘어옴.
-		@PostMapping("empInsert")
-		public String empInsertProcess(EmpVO empVO) {
-			int eid = empService.createInfo(empVO);
-			String url = null;
-			if(eid > -1) {
-				// 정상적으로 등록
-				url = "redirect:empinfo?employeeId=" + eid;
-			} else {
-				// 등록되지 않은 경우
-				url = "redirect:empList";
-			}
-			return url;
-		}
-		// 수정 - 페이지 : GET // 단건 조회랑 똑같다!
-		@GetMapping("empUpdate")
-		public String empUpdateForm(EmpVO empVO, Model model) {
-			EmpVO findVO = empService.findInfoById(empVO);
-			model.addAttribute("emp", findVO);
-			return "emp/update";
-		}
-		
-		// 수정 - 처리 : POST + AJAX + JSON
-		@PostMapping("empUpdate")
-		@ResponseBody // AJAX를 사용하는 경우 model 객체를 사용하지 않는다.
-		public Map<String, Object> empUpdateProcess(@RequestBody EmpVO empVO) {
-			return empService.modifyInfo(empVO);
-		}
-		
-		// 삭제 - 처리 : GET => QueryString
-		@GetMapping("empDelete")
-		public String empDelete(Integer employeeId) {
-			empService.removeInfo(employeeId);
-			return "redirect:empList";
-		}
+		return "";
+	}
+	
+	// 수정 - 페이지 : GET <=> 단건조회와 같음. 경로, 이름 빼고 나머지는 다 같다고 보면 됌
+	@GetMapping("empUpdate")
+	public String empUpdateForm(EmpVO empVO, Model model) {
+		EmpVO findVO = empService.findInfoById(empVO);
+		model.addAttribute("emp", findVO);
+		return "emp/update";
+	}
+	
+	// 수정 - 처리 : POST + AJAX + JSON
+	@PostMapping("empUpdate")  
+	@ResponseBody // AJAX => Model 사용하지 않음
+												//JSON / 보내주는 데이터가 JSON 만이 아닐수도 있음.
+	public Map<String, Object> empUpdateProcess(@RequestBody EmpVO empVO) {
+		return empService.modifyInfo(empVO);
+	}
+	
+	// 삭제 - 처리 : GET
+	@GetMapping("empDelete")
+	public String empDelete(Integer employeeId) { 
+		empService.removeInfo(employeeId);
+		return "redirect:empList"; //삭제된 데이터는 안보이게 돌려준다
 	}
 
+	
+}
