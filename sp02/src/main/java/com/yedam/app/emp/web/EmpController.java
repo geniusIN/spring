@@ -48,13 +48,13 @@ public class EmpController {
 		model.addAttribute("emp", findVO);
 		return "emp/info";
 	}
-	// 등록 - 페이지 : GET
+	// 등록 - 페이지 : GET (페이지 여는 역할)
 	@GetMapping("empInsert")
 	public String empInsertForm() {
 		return "emp/insert";
 	}
 	
-	// 등록 - 처리 : POST => <form/> submit QueryString
+	// 등록 - 처리 : POST => <form/> submit QueryString (등록 처리하는 방식. form태그 or AJAX)
 	@PostMapping("empInsert")
 	public String empInsertProcess(EmpVO empVO) {
 		int eid = empService.createInfo(empVO);
@@ -66,7 +66,7 @@ public class EmpController {
 			//등록되지 않은 경우 -> 얘는 등록이 실패했을때 실질적으로 실행되지 않을것 - 등록 실패 = 에러 이기 때문에 코드가 중단될것임.
 			url="redirect:empList";
 		}
-		return "";
+		return url;
 	}
 	
 	// 수정 - 페이지 : GET <=> 단건조회와 같음. 경로, 이름 빼고 나머지는 다 같다고 보면 됌
@@ -85,7 +85,7 @@ public class EmpController {
 		return empService.modifyInfo(empVO);
 	}
 	
-	// 삭제 - 처리 : GET
+	// 삭제 - 처리 : GET => QueryString : empDelete key=value. 매개변수명이 key! body 활용이 아니라 ?를 붙여서...
 	@GetMapping("empDelete")
 	public String empDelete(Integer employeeId) { 
 		empService.removeInfo(employeeId);
