@@ -27,7 +27,7 @@ public class EmpRestController {
 		return empService.findAllList();
 	}
 	// 단건조회: GET => emps/100
-	@GetMapping("emps/${eid}")
+	@GetMapping("emps/{eid}")
 	public EmpVO empInfo(@PathVariable Integer eid) {
 		EmpVO empVO = EmpVO.builder()
 						   .employeeId(eid)
@@ -41,7 +41,7 @@ public class EmpRestController {
 	}
 	
 	// 수정: PUT => emps/100
-	@PutMapping("emps/${eid}")
+	@PutMapping("emps/{eid}")
 	public Map<String, Object>
 			empUpdate(@PathVariable Integer eid, @RequestBody EmpVO empVO) {
 		empVO.setEmployeeId(eid);
@@ -49,7 +49,7 @@ public class EmpRestController {
 	}
 	
 	// 삭제: DELETE => emps/100
-	@DeleteMapping("emps/{}eid") 
+	@DeleteMapping("emps/{eid}") 
 	public Map<String, Object> empDelete(@PathVariable Integer eid) {
 		return empService.removeInfo(eid);
 	}
